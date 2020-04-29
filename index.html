@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>WebSocket demo</title>
+    </head>
+    <body>
+        <h1>Echo WebSocket</h1>
+        <form action="" onsubmit="sendMessage(event)">
+            <input type="text" id="messageText" autocomplete="off"/>
+            <button>Send</button>
+        </form>
+        <ul id='messages'>
+        </ul>
+        <script>
+            function connectWebsocket() {
+                return new WebSocket("ws://127.0.0.1:8000/");
+            };
+
+            function onMessage(event) {
+                var messages = document.getElementById('messages');
+                var message = document.createElement('li');
+                var content = document.createTextNode(event.data);
+                message.appendChild(content);
+                messages.appendChild(message);
+            };
+
+            var ws = connectWebsocket();
+            ws.onmessage = onMessage;
+
+            function processCommands(value) {
+                var messages = document.getElementById('messages');
+                var message = document.createElement('li');
+
+                if (value == "disconnect") {
+                    ws.close();
+
+                    var content = document.createTextNode('Disconnected!');
+                    message.appendChild(content);
+                    messages.appendChild(message);
+                    return null;
+                }
+
+                if (value == "connect") {
+                    ws = connectWebsocket();
+                    ws.onmessage = onMessage;
+
+                    var content = document.createTextNode('Connected again!');
+                    message.appendChild(content);
+                    messages.appendChild(message);
+                    return null;
+                }
+
+                return value;
+            };
+
+            function sendMessage(event) {
+                var input = document.getElementById("messageText");
+                var value = processCommands(input.value);
+
+                if (value != null) ws.send(value);
+                input.value = '';
+                event.preventDefault();
+            };
+        </script>
+    </body>
+</html>
